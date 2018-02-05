@@ -5,6 +5,13 @@ void setup()
 }
 
 float kt = 0;
+boolean looping = true;
+
+void keyPressed()
+{
+  looping = !looping;
+  if(looping) { loop(); } else { noLoop(); }
+}
 
 void draw()
 {
@@ -15,16 +22,17 @@ void draw()
   float wx = width / 2.1;
   float wy = height / 2.1;
 
-  int n = 400;
+  int n = 800;
 
-  float kmin = 0;
-  float kmax = 10;
+  float kmin = 100;
+  float kmax = 800;
   float k = (float)(0 + (kmax-kmin)*Math.sin(kt));
-  kt += 0.01;
+  kt += 0.001;
   
   float px_old = 0, py_old = 0;
   for (int i = 0; i < n; i++)
   {
+    stroke((float)(255 * Math.exp(-i/100.0)));
     float t = (float)(2.0 * Math.PI * (float)i / (float)n);
     float rx = wx * (float)(Math.exp(-t));
     float ry = wy * (float)(Math.exp(-t));
