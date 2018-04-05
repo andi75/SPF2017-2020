@@ -220,29 +220,36 @@ public void keyPressed() {
     isValidJuliaSet = false;
     println("setting n to " + n);
   }
+  if (key == 'e')
+  {
+    if(isJuliaSet)
+      thread("exportHighresJulia");
+    else
+      thread("exportHighresMandelbrot");
+  }
   redraw();
 }
 
 public void computeJuliaSet()
 {
-  computeImage(imgJuliaSet, jzxCenter, jzyCenter, jzWidth, jzHeight, true);
+  computeImage(imgJuliaSet, n, jzxCenter, jzyCenter, jzWidth, jzHeight, true);
   isValidJuliaSet = true;
 }
 
 public void computeMandelbrot()
 {
-  computeImage(imgMandelbrot, mzxCenter, mzyCenter, mzWidth, mzHeight, false);
+  computeImage(imgMandelbrot, n, mzxCenter, mzyCenter, mzWidth, mzHeight, false);
   isValidMandelbrot = true;
 }
 
 public void computeJuliaPreview()
 {
   println("computing preview");
-  computeImage(imgJuliaPreview, jzxCenter, jzyCenter, jzWidth, jzHeight, true);
+  computeImage(imgJuliaPreview, n, jzxCenter, jzyCenter, jzWidth, jzHeight, true);
   isValidJuliaPreview = true;
 }
 
-public void computeImage(PImage img, double zxCenter, double zyCenter, double zWidth, double zHeight, boolean isJulia)
+public void computeImage(PImage img, int iterations, double zxCenter, double zyCenter, double zWidth, double zHeight, boolean isJulia)
 {
   img.loadPixels();
 
@@ -252,6 +259,7 @@ public void computeImage(PImage img, double zxCenter, double zyCenter, double zW
   double zymin = zyCenter - zHeight / 2;
   double zymax = zyCenter + zHeight / 2;
 
+  double percentage = 0;
   for (int y = 0; y < img.height; y++)
   {
     for (int x = 0; x < img.width; x++)
@@ -263,7 +271,7 @@ public void computeImage(PImage img, double zxCenter, double zyCenter, double zW
 
       double a = za;
       double b = zb;
-      while (count < n)
+      while (count < iterations)
       {
         double a_neu;
         double b_neu;
@@ -276,7 +284,7 @@ public void computeImage(PImage img, double zxCenter, double zyCenter, double zW
           a_neu = a * a - b * b + cx;
           b_neu = 2 * a * b + cy;
         }          
-        if (a_neu*a_neu + b_neu*b_neu > 4)
+        if (a_neu*a_neu + b_neu*b_neu > 1000)
         {
           break;
         }
@@ -286,17 +294,24 @@ public void computeImage(PImage img, double zxCenter, double zyCenter, double zW
       }
 
       color c;
-      if (count == n)
+      if (count == iterations)
       {
         c = color(0, 0, 0);
       } else
       { 
-        float h = (float)count / (float)n;
+        // float h = (float)log(count) / (float)log(iterations);
+        float h = (float)(count) / (float)(200);
+        while(h > 1) h -= 1;
         c = color( h, 1, 1 );
       }
       // println(img.width + ", " + img.height + " / " + x + ", " + y);
       img.pixels[(img.height - y - 1) * img.width + x] = c;
       // img.pixels[y * img.width + x] = c;
+    }
+    if(img.width > 1000 && (double)y/(double)img.height - percentage > 0.01)
+    {
+      percentage = (double)y/(double)img.height;
+      println((int)(percentage * 100) + "% completed");
     }
   }
   img.updatePixels();
@@ -337,4 +352,24 @@ public void draw() {
       image(imgJuliaPreview, 10, height - 10 - imgJuliaPreview.height);
     }
   }
+}
+
+public void exportHighresJulia() { exportHighres(true); }
+public void exportHighresMandelbrot() { exportHighres(false); }
+
+public void exportHighres(boolean isJulia)
+{
+  PImage img = createImage(16000, 16000, RGB);
+  if(isJulia)
+  {
+    computeImage(img, n, jzxCenter, jzyCenter, jzWidth, jzHeight, true);
+  }
+  else
+  {
+    computeImage(img, n, mzxCenter, mzyCenter, mzWidth, mzHeight, false);
+  }
+  img.save("highres-" + frameCount + ".png");
+  frameCount += 1;
+  println("highres export completed");
+  
 }
