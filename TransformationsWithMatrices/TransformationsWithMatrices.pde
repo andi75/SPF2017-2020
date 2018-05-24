@@ -3,6 +3,26 @@
 // The function doesn't include any boundary checks and will crash if the matrix and vector
 // dimensions don't match
 
+float[] matrixTimesMatrix(float m1[], float m2[])
+{
+  // compute the number of rows/columns in m1
+  // assumption: m1 and m2 are square and have the same dimension
+  int n = (int) sqrt(m1.length);
+  float mResult[] = new float[m1.length];
+  
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < n; j++)
+    {
+      for(int k = 0; k < n; k++)
+      {
+        mResult[i*n + j] += m1[i * n + k] * m2[k * n + j];
+      }
+    }
+  }
+  return mResult;
+}
+
 float[] matrixTimesVector(float m[], float a[])
 {
   float v[] = new float[a.length];
@@ -90,6 +110,8 @@ void draw()
     { 5, 0, 1 }, 
     { 6, 4, 1 }
   };
+  float mTemp[] = matrixTimesMatrix( R90, TZminus );
+  float mTotal[] = matrixTimesMatrix( TZplus, mTemp );
 
   // draw the original points as a line loop in black
   stroke(0);
@@ -105,12 +127,14 @@ void draw()
     // Exercise: Write a function for matrix multiplication,
     // and rewrite the code below to first multiply the matrices,
     // and then transform the points using a single matrix*vector operation
-    transformedPoints[i] =
-      matrixTimesVector(TZplus,
-        matrixTimesVector( R90, 
-          matrixTimesVector( TZminus, points[i] )
-        )
-      );
+    //transformedPoints[i] =
+    //  matrixTimesVector(TZplus,
+    //    matrixTimesVector( R90, 
+    //      matrixTimesVector( TZminus, points[i] )
+    //    )
+    //  );
+    transformedPoints[i] = matrixTimesVector(mTotal, points[i]);
+    
     // with temporary variables, it would look like this:
     // float v1[] = matrixTimesVector(TZminus,points[i]);
     // float v2[] = matrixTimesVector(R90,v1);
