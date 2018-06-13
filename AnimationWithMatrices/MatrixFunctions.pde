@@ -36,6 +36,16 @@ float[] matrixTimesVector(float m[], float a[])
   return v;
 }
 
+float[] matrixScaling3x3(float s1, float s2)
+{
+  float m[] = {
+    s1, 0, 0,
+    0, s2, 0,
+    0, 0, 1
+  };
+  return m;
+}
+
 float[] matrixTranslation3x3(float tx, float ty)
 {
   float m[] = {
